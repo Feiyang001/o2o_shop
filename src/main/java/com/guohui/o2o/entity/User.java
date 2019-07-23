@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class User {
 
-    private Long userId;
+    private Long ownerId;
 
     private String userName;
     //用户的头像地址
@@ -23,11 +23,11 @@ public class User {
     private Integer role;
 
     public Long getUserId() {
-        return userId;
+        return ownerId;
     }
 
     public void setUserId(Long userId) {
-        this.userId = userId;
+        this.ownerId = userId;
     }
 
     public String getUserName() {

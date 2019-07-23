@@ -11,5 +11,4 @@
         from tb_area
         order by priority desc
     </select>
-
 </mapper>

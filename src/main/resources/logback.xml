@@ -1,35 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+    <property name="log.level" value = "debug" />
+    <property name="log.maxHistory" value="30"/>
+    <property name="log.filePath" value="${catalina.base}/logs/webapps" />
+    <property name="log.pattern" value="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%p][%c{40}][%t]%m%n"/>
+
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoding>UTF-8</encoding>
+        <!--格式-->
         <encoder>
-            <pattern>[%d{HH:mm:ss.SSS}][%p][%c{40}][%t]%m%n</pattern>
+            <pattern>${log.pattern}</pattern>
         </encoder>
+        <!--拦截器-->
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>DEBUG</level>
         </filter>
     </appender>
 
-    <appender name="mmall" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>F:/apache-tomcat-7.0.75/logs/mmall.log</File>
-        <!--<File>/developer/apache-tomcat-7.0.73/logs/mmall.log</File>-->
+    <appender name="debug" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>F:/apache-tomcat-7.0.75/logs/debug.log</File>
+        <!--<File>/developer/apache-tomcat-7.0.73/logs/debug.log</File>-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>F:/apache-tomcat-7.0.75/logs/mmall.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <fileNamePattern>F:/apache-tomcat-7.0.75/logs/debug.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
             <append>true</append>
             <maxHistory>10</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>[%d{HH:mm:ss.SSS}][%p][%c{40}][%t] %m%n</pattern>
+            <pattern>${log.pattern}</pattern>
         </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
     </appender>
 
 
     <appender name="error" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>F:/apache-tomcat-7.0.75/logs/error.log</File>
+        <File>F:/apache-tomcat-7.0.75/logs/shop_error.log</File>
         <!--<File>/developer/apache-tomcat-7.0.73/logs/error.log</File>-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--<fileNamePattern>/devsoft/apache-tomcat-7.0.73/logs/error.log.%d{yyyy-MM-dd}.gz</fileNamePattern>-->
-            <fileNamePattern>F:/apache-tomcat-7.0.75/logs/error.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <fileNamePattern>F:/apache-tomcat-7.0.75/logs/shop_error.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
             <append>true</append>
             <maxHistory>10</maxHistory>
         </rollingPolicy>
@@ -43,13 +56,14 @@
         </filter>
     </appender>
 
-    <logger name="com.mmall" additivity="false" level="INFO" >
-        <appender-ref ref="mmall" />
+    <!--additivity  表示不会继承root标签下的内容-->
+    <logger name="com.guohui.o2o" additivity="false" level="DEBUG" >
+        <appender-ref ref="debug" />
         <appender-ref ref="console"/>
     </logger>
 
     <!-- mybatis log 日志 -->
-    <logger name="com.mmall.dao" level="DEBUG"/>
+    <!--<logger name="com.guohui.o2o.dao" level="DEBUG"/>-->
 
     <!--<logger name="com.ibatis.sqlmap.engine.impl.SqlMapClientDelegate" level="DEBUG" >-->
         <!--<appender-ref ref="console"/>-->
@@ -65,7 +79,7 @@
     <!--<logger name="java.sql.PreparedStatement" level="DEBUG">-->
         <!--<appender-ref ref="console"/>-->
     <!--</logger>-->
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="console"/>
         <appender-ref ref="error"/>
     </root>

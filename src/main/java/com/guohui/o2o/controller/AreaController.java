@@ -1,7 +1,9 @@
 package com.guohui.o2o.controller;
 
 import com.guohui.o2o.entity.Area;
-import com.guohui.o2o.service.AreaService;
+import com.guohui.o2o.service.IAreaService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,12 +18,16 @@ import java.util.Map;
 @RequestMapping("/admin")
 public class AreaController {
 
+    Logger logger = LoggerFactory.getLogger(AreaController.class);
+
     @Autowired
-    private AreaService areaService;
+    private IAreaService areaService;
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     @ResponseBody
     private Map<String,Object> listArea(){
+        logger.info("========start======");
+        Long startTime = System.currentTimeMillis();
         Map<String,Object> modelMap = new HashMap<String,Object>();
         try {
             List<Area> areaList = areaService.getAreaList();
@@ -30,8 +36,13 @@ public class AreaController {
         }catch (Exception e){
             e.printStackTrace();
             modelMap.put("success",false);
-                      modelMap.put("errorMessage",e.toString());
+            modelMap.put("errorMessage",e.toString());
         }
+        logger.error("test");
+        Long endTime = System.currentTimeMillis();
+        logger.debug("time:[{}ms]",endTime-startTime);
+        logger.info("=====end=====");
+
         return modelMap;
     }
 }

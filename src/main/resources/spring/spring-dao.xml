@@ -10,27 +10,63 @@
     <context:property-placeholder location="classpath:datasource.properties"/>
     <!-- 1.配置数据库相关参数properties的属性：${url} -->
 
-
     <!-- 2.数据库连接池 -->
-    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
-        <property name="driverClass" value="${db.driverClassName}" />
-        <property name="jdbcUrl" value="${db.url}" />
-        <property name="user" value="${db.username}" />
-        <property name="password" value="${db.password}" />
+    <bean id="abstractDataSource" class="com.alibaba.druid.pool.DruidDataSource" abstract="true" destroy-method="close">
+        <!-- 连接池的私有属性 -->
+        <property name="maxActive" value="30" />
+        <property name="minIdle" value="10" />
+        <property name="initialSize" value="10"/>
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="60000" />
 
-        <!-- c3p0连接池的私有属性 -->
-        <property name="maxPoolSize" value="30" />
-        <property name="minPoolSize" value="10" />
-        <property name="initialPoolSize" value="10"/>
-        <!-- 关闭连接后不自动commit -->
-        <property name="autoCommitOnClose" value="false" />
-        <!-- 获取连接超时时间 -->
-        <property name="checkoutTimeout" value="10000" />
-        <!-- 当获取连接失败重试次数 -->
-        <property name="acquireRetryAttempts" value="2" />
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+
+        <property name="validationQuery" value="SELECT 1" />
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="true" />
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20" />
+    </bean>
+    <!--主库的配置-->
+    <bean id="master" parent="abstractDataSource" >
+        <property name="driverClassName" value="${db.driverClassName}" />
+        <property name="url" value="${db.master.url}" />
+        <property name="username" value="${db.username}" />
+        <property name="password" value="${db.password}" />
+    </bean>
+
+    <!--从库的配置-->
+    <bean id="slave" parent="abstractDataSource" >
+        <property name="driverClassName" value="${db.driverClassName}" />
+        <property name="url" value="${db.slave.url}" />
+        <property name="username" value="${db.username}" />
+        <property name="password" value="${db.password}" />
     </bean>
 
     <!-- 配置动态数据源，这儿targetDataSources就是路由数据源所对应的名称 -->
+    <bean id="dynamicDataSource" class="com.guohui.o2o.dao.split.DynamicDataSource">
+        <property name="targetDataSources">
+            <map>
+                <!--value-ref 和上面的bean的id保持一致  key 是对应holder里面的lookupKey-->
+                <entry value-ref="master" key="master"></entry>
+                <entry value-ref="slave" key="slave"></entry>
+            </map>
+        </property>
+    </bean>
+
+    <!--对dynamicDataSource 进行懒加载 这是因为要等到sql 语句正式执行的时候才DataSource指定出啦 -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
+        <property name="targetDataSource">
+            <ref bean="dynamicDataSource"/>
+        </property>
+    </bean>
 
     <!-- 3.配置SqlSessionFactory对象 -->
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">

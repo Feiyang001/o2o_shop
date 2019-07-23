@@ -4,7 +4,7 @@ import com.guohui.o2o.entity.Area;
 
 import java.util.List;
 
-public interface AreaService {
+public interface IAreaService {
 
     List<Area> getAreaList();
 }
